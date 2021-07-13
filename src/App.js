@@ -1,5 +1,6 @@
 import React from 'react';
 import './style.css';
+import axios from 'axios';
 
 class Square extends React.Component {
   render() {
@@ -109,18 +110,60 @@ class Board extends React.Component {
   }
 }
 
+class UserDetails extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { expanded: false };
+  }
+
+  render() {
+    if (!this.props.user) return null;
+    return (
+      <div>
+        <div onClick={() => this.setState({ expanded: !this.state.expanded })}>
+          {this.props.user.name}
+        </div>
+        {this.state.expanded && (
+          <div>
+            <div>Username: {this.props.user.username}</div>
+            <div>
+              Email:
+              {this.props.user.email}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+}
+
 class Game extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { users: [] };
+  }
+
+  componentDidMount() {
+    axios
+      .get('https://jsonplaceholder.typicode.com/users')
+      .then(response => this.setState({ users: response.data }))
+      .catch(err => err);
+  }
+
   render() {
     return (
-      <div className="game">
-        <div className="game-board">
-          <Board />
+      <>
+        <div className="game">
+          <div className="game-board">
+            <Board />
+          </div>
         </div>
         <div className="game-info">
-          <div>{/* status */}</div>
-          <ol>{/* TODO */}</ol>
+          {this.state.users.map(user => (
+            <UserDetails user={user} />
+          ))}
         </div>
-      </div>
+      </>
     );
   }
 }
